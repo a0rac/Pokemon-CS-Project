@@ -1,0 +1,228 @@
+import java.util.Scanner;
+
+
+// class for general attacks
+abstract class Attack {
+   protected String name;
+   protected String type;
+   protected int power;
+
+
+   public Attack(String name, String type, int power) {
+       this.name = name;
+       this.type = type;
+       this.power = power;
+   }
+
+
+   public String getName() {
+       return name;
+   }
+
+
+   public String getType() {
+       return type;
+   }
+
+
+   public int getPower() {
+       return power;
+   }
+}
+
+
+// specific attack classes
+class Psychic extends Attack {
+   public Psychic() {
+       super("Psychic", "Psychic", 90);
+   }
+}
+
+
+class ShadowBall extends Attack {
+   public ShadowBall() {
+       super("Shadow Ball", "Ghost", 80);
+   }
+}
+
+
+class IronHead extends Attack {
+   public IronHead() {
+       super("Iron Head", "Steel", 75);
+   }
+}
+
+
+class Earthquake extends Attack {
+   public Earthquake() {
+       super("Earthquake", "Ground", 100);
+   }
+}
+
+
+// pokemon class with attacks and mega evolution option
+class Pokemon {
+   private String name;
+   private String type;
+   private int hp;
+   private Attack[] attacks;
+   private boolean megaEvolved;
+
+
+   public Pokemon(String name, String type, int hp, Attack[] attacks) {
+       this.name = name;
+       this.type = type;
+       this.hp = hp;
+       this.attacks = attacks;
+       this.megaEvolved = false;
+   }
+
+
+   public String getName() {
+       return name;
+   }
+
+
+   public String getType() {
+       return type;
+   }
+
+
+   public int getHp() {
+       return hp;
+   }
+
+
+   public Attack[] getAttacks() {
+       return attacks;
+   }
+
+
+   public boolean isMegaEvolved() {
+       return megaEvolved;
+   }
+
+
+   public void megaEvolve() {
+       System.out.println(name + " has mega evolved!");
+       this.megaEvolved = true;
+   }
+
+
+   public void displayInfo() {
+       System.out.println("Name: " + name);
+       System.out.println("Type: " + type);
+       System.out.println("HP: " + hp);
+       System.out.println("Attacks:");
+       for (int i = 0; i < attacks.length; i++) {
+           System.out.println("  " + (i + 1) + ". " + attacks[i].getName());
+       }
+   }
+
+
+   public void takeDamage(int damage) {
+       hp -= damage;
+       if (hp < 0) {
+           hp = 0;
+       }
+   }
+
+
+   public void resetMegaEvolution() {
+       this.megaEvolved = false;
+   }
+
+
+   public void attack(int attackIndex, Pokemon target) {
+       Scanner scanner = new Scanner(System.in);
+       if (attackIndex >= 1 && attackIndex <= attacks.length) {
+           Attack selectedAttack = attacks[attackIndex - 1];
+           System.out.println(name + " used " + selectedAttack.getName() + " on " + target.getName() + "!");
+
+
+           // apply damage to the target pokemon based on the attack's damage
+           int damage = selectedAttack.getPower();
+           target.takeDamage(damage);
+
+
+           // check if mega evolution is possible
+           if (!megaEvolved) {
+               System.out.println(name + " - Mega evolve? (1. Yes, 2. No):");
+               int megaEvolveChoice = scanner.nextInt();
+               if (megaEvolveChoice == 1) {
+                   megaEvolve();
+               }
+           }
+       } else {
+           System.out.println("Invalid attack input!");
+       }
+   }
+}
+
+
+public class JavaProgram {
+   public static void main(String[] args) {
+       Scanner scanner = new Scanner(System.in);
+
+
+       // generate pokemon with attacks
+       Attack[] alakazamAttacks = {new Psychic(), new ShadowBall(), new IronHead(), new Earthquake()};
+       Pokemon alakazam = new Pokemon("Alakazam", "Psychic", 70, alakazamAttacks);
+
+
+       Attack[] aggronAttacks = {new IronHead(), new Earthquake(), new ShadowBall(), new Psychic()};
+       Pokemon aggron = new Pokemon("Aggron", "Steel", 80, aggronAttacks);
+
+
+       // display pokemon information
+       System.out.println("Player 1 - Choose your Pokemon:");
+       alakazam.displayInfo();
+
+
+       System.out.println("\nPlayer 2 - Choose your Pokemon:");
+       aggron.displayInfo();
+
+
+       // loop capability
+       while (alakazam.getHp() > 0 && aggron.getHp() > 0) {
+           // player 1’s turn
+           System.out.println("\nPlayer 1 - Choose attack (1-" + alakazam.getAttacks().length + "):");
+           int player1AttackChoice = scanner.nextInt();
+           alakazam.attack(player1AttackChoice, aggron);
+
+
+           // check if player 2's pokemon is dead
+           if (aggron.getHp() <= 0) {
+               System.out.println("\nPlayer 1 wins!");
+               break;
+           }
+
+
+           // Player 2 turn
+           System.out.println("\nPlayer 2 - Choose attack (1-" + aggron.getAttacks().length + "):");
+           int player2AttackChoice = scanner.nextInt();
+           aggron.attack(player2AttackChoice, alakazam);
+
+
+           // check if player 1's pokemon is dead
+           if (alakazam.getHp() <= 0) {
+               System.out.println("\nPlayer 2 wins!");
+               break;
+           }
+
+
+           // display pokemon information after each round
+           System.out.println("\nPlayer 1's " + alakazam.getName() + " - HP: " + alakazam.getHp());
+           System.out.println("Player 2's " + aggron.getName() + " - HP: " + aggron.getHp());
+
+
+           // reset mega evolution option for the next round
+           alakazam.resetMegaEvolution();
+           aggron.resetMegaEvolution();
+       }
+
+
+       // closes scanner
+       scanner.close();
+   }
+}
